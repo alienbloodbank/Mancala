@@ -9,6 +9,8 @@
 #include "mancala.h"
 #include "search.h"
 
+#define PRESS_ENTER std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
 using namespace mancala;
 
 enum class Strategy
@@ -52,7 +54,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
   	static std::mt19937 engine{random_device()};
 
 	std::cerr << "\nP" << player_turn + 1 << " turn...\n\nPress enter to continue...";
-        std::cin.ignore(32767, '\n');
+        PRESS_ENTER
 
 	while (is_turn) {
 		std::vector<int> actions = current_state.actions(player_turn);
@@ -66,9 +68,9 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				
 					if (!(std::cin >> move)){
 						std::cin.clear();
-						std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    					} else {
-						std::cin.ignore(32767, '\n');
+    						PRESS_ENTER
+					} else {
+						PRESS_ENTER
 						move--;
 						/*if((move < PITS) && (move >= 0) && actions[move]) {
 							std::cerr << "Human choose: " << move + 1 << std::endl;
@@ -136,9 +138,9 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 		if (current_state.terminal_test()) {
 			int outcome = current_state.utility(player_turn);
 			if (outcome > 0) {
-				std::cout << "P" << player_turn + 1 << " wins!" << std::endl;
+				std::cout << "Player " << player_turn + 1 << " wins!" << std::endl;
 			} else if (outcome < 0) {
-				std::cout << "P" << (player_turn == 0 ? 2 : 1) << " wins!" << std::endl;
+				std::cout << "Player " << (player_turn == 0 ? 2 : 1) << " wins!" << std::endl;
 			} else {
 				std::cout << "Draw." << std::endl;
 			}
@@ -147,9 +149,11 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 
 		if (is_turn) {
 			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n\nPress enter to continue...";
-        		std::cin.ignore(32767, '\n');
+			PRESS_ENTER
 		} else {
 			// TODO: print the capture state here
+
+				
 		}
 	}
 }

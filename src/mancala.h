@@ -3,17 +3,17 @@
 
 #include <bits/stdc++.h>
 
+enum Turn {
+	PLAYER1 = 0,
+	PLAYER2 = 1
+};
+
 namespace mancala {
 	constexpr int PITS = 6;
 	constexpr int STONES = 4;
 
 	constexpr int BOARD_SIZE = (PITS + 1) << 1;
 	constexpr int TOTAL_PITS = PITS << 1;
-
-	enum Turn {
-        	PLAYER1 = 0,
-        	PLAYER2 = 1
-	};
 
 	class BoardState {
 	private:
@@ -72,7 +72,6 @@ namespace mancala {
 		if (i < (PITS + precomputed_limit) && 
 			i >= precomputed_limit &&
 			bins[i] == 1 && bins[TOTAL_PITS - i] > 0) {
-			//std::cerr << "\nPlayer" << player_turn + 1 << " captures them all!\n";
 			bins[PITS + precomputed_limit] += (bins[TOTAL_PITS - i] + 1);
 			bins[TOTAL_PITS - i] = bins[i] = 0;
 		}

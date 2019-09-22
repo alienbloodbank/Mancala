@@ -1,10 +1,10 @@
 CXX = g++
-CXXFLAGS = -pthread -g -std=c++17 -I.
+CXXFLAGS = -pthread -std=c++17 -I.
 LDFLAGS = -pthread
-SOURCE = $(wildcard *.cpp)
-OBJECTS = $(SOURCE:.cpp=.o)
+SOURCE = play.cpp
+OBJECTS = play.o
 TARGET = play
-DEPS = $(wildcard *.h)
+DEPS = mancala.h search.h
 
 default: $(TARGET)
 
@@ -13,6 +13,7 @@ default: $(TARGET)
 
 play: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $< -o $@ $(LDFLAGS)
+	@echo "Build complete!"
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)

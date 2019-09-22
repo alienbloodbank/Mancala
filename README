@@ -1,0 +1,22 @@
+CSC442: Intro to AI
+September 15, 2019
+Author: Soubhik Ghosh (netid: sghosh13)
+
+Language: C++ 17
+
+Files:
+        README, play.cpp, mancala.h, search.h
+
+Build Instructions:
+	cd src/
+	make
+
+Running Examples:
+	- Human vs Human
+	  ./play human human
+	- Human vs Random
+	  ./play human random
+	- Random vs minimax
+	  ./play random minimax
+	- Alphabeta Pruning vs minimax
+	  ./play alphabeta minimax
