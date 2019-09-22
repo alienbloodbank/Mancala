@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -pthread -std=c++17 -I.
+CXXFLAGS = -pthread -g -std=c++17 -I.
 LDFLAGS = -pthread
 SOURCE = $(wildcard *.cpp)
 OBJECTS = $(SOURCE:.cpp=.o)
