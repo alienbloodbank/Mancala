@@ -114,6 +114,9 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 					move = Search<BoardState, Turn>::minimax_decision(current_state, player_turn, 8);
 					std::cerr << "Minimax choose: " << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << minimax_time.elapsed() << " ms" << std::endl;
+					#ifdef BRANCHING_FACTOR
+						std::cerr << "Minimax explored nodes: " << Search<BoardState, Turn>::minimax_nodes << std::endl;
+					#endif
 				}
 				break;
 			case Strategy::ALPHABETA:
@@ -123,12 +126,15 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 					move = Search<BoardState, Turn>::alphabeta_search(current_state, player_turn, 12);
 					std::cerr << "Alphabeta choose: " << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << alphabeta_time.elapsed() << " ms" << std::endl;
+					#ifdef BRANCHING_FACTOR
+                                                std::cerr << "Alphabeta explored nodes: " << Search<BoardState, Turn>::alphabeta_nodes << std::endl;
+                                        #endif
 				}
 				break;
 			default:
 				break;
 		}
-		
+
 		// current_state is updated as the player makes a move
 		is_turn = current_state.result(move, player_turn);
 
@@ -151,9 +157,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n\nPress enter to continue...";
 			PRESS_ENTER
 		} else {
-			// TODO: print the capture state here
-
-				
+			// TODO: print the capture state here		
 		}
 	}
 }

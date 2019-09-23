@@ -10,7 +10,9 @@ enum Turn {
 
 namespace mancala {
 	constexpr int PITS = 6;
-	constexpr int STONES = 4;
+	constexpr int STONES_PER_PIT = 4;
+	constexpr int TOTAL_STONES = STONES_PER_PIT * (PITS << 1);
+	constexpr int HALF_STONES = TOTAL_STONES >> 1;
 
 	constexpr int BOARD_SIZE = (PITS + 1) << 1;
 	constexpr int TOTAL_PITS = PITS << 1;
@@ -22,7 +24,7 @@ namespace mancala {
 		BoardState() 
 		{
 			// Initialize board with each bin having 4 stones
-			std::fill_n (bins, BOARD_SIZE, STONES);
+			std::fill_n (bins, BOARD_SIZE, STONES_PER_PIT);
 			// Initially both stores are empty
 			bins[PITS] = bins[BOARD_SIZE - 1] = 0;
 		}
@@ -33,10 +35,41 @@ namespace mancala {
 			memcpy(this->bins, state.bins, BOARD_SIZE * sizeof(int8_t));
 		}
 
-		// virtual board
 		bool result(int move, Turn player_turn);
 		int8_t utility(Turn player_turn) const;
-		bool terminal_test();		
+
+		int8_t h1(Turn player_turn)
+		{
+			return bins[PITS + (PITS + 1) * player_turn] - bins[PITS + (PITS + 1) * (1 - player_turn)];
+		}
+
+		int8_t h2(Turn player_turn)
+		{
+			int8_t val = bins[PITS + (PITS + 1) * player_turn] - bins[PITS + (PITS + 1) * (1 - player_turn)];
+			int8_t rem = 0;
+			for(size_t i = 0;i < PITS;i++) {
+				rem += (bins[i] + bins[i + (PITS + 1)]);
+			}
+			if(val > 0) {
+				val += (rem >> 1);
+			} else if (val < 0) {
+				val -= (rem >> 1);
+			}
+			return val;
+		}
+
+		bool cutoff_test1(int depth)
+		{
+			return depth == 0;
+		}
+
+		bool cutoff_test2(int depth)
+		{
+			return (bins[PITS] > HALF_STONES) || (bins[BOARD_SIZE - 1] > HALF_STONES);
+		}
+
+		bool terminal_test();
+		
 		std::vector<int> actions(Turn player_turn);
 		void display(Turn player_turn) const;
 	};
@@ -79,14 +112,14 @@ namespace mancala {
 		return false;
 	}
 
-	// TODO: Improve evaluation function
 	inline int8_t BoardState::utility(Turn player_turn) const
 	{
-		if (player_turn == Turn::PLAYER1) {
-			return bins[PITS] - bins[TOTAL_PITS + 1];
-		} else {
-			return bins[TOTAL_PITS + 1] - bins[PITS];
+		// (my_mancala – your_mancala) + (stones_on_my_side – stones_on_your_side)
+		int8_t diff = 0;		
+		for(size_t i = 0;i <= PITS;i++) {
+			diff += (bins[i + (PITS + 1) * player_turn] - bins[i + (PITS + 1) * (1 - player_turn)]);
 		}
+		return diff;
 	}
 
 	bool BoardState::terminal_test()
@@ -102,9 +135,7 @@ namespace mancala {
 			}
 		}
 		return true;
-/*		return std::all_of(bins, bins + PITS, [](int i){return i == 0;}) ||
-			std::all_of(bins + PITS + 1, bins + TOTAL_PITS + 1, [](int i){return i == 0;});
-*/	}
+	}
 
 	inline std::vector<int> BoardState::actions(Turn player_turn)
 	{

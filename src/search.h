@@ -1,56 +1,85 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include <bits/stdc++.h>
+#include <bits/stdc++.h> 
 
 // MINIMAX
 
 template <class T, class P>
 struct Search {
-//int8_t min_value(const T& state, Turn player_turn, int ply);
-	static int8_t max_value(T& state, P player_turn, int ply)
+	static inline int minimax_nodes = 0;
+       	static inline int alphabeta_nodes = 0;
+	
+	private:	
+	static int8_t max_value(T& state, P player_turn, int depth)
 	{
-		if (ply == 0 || state.terminal_test()) return state.utility(player_turn);
+		// Cutoff tests
+		if (state.cutoff_test1(depth)) return state.h1(player_turn);
+		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+
+		if (state.terminal_test()) return state.utility(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
 		int8_t v = -128, v1;
-		for (auto const a : actions) {
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? max_value(child_state, player_turn, ply) : min_value(child_state, static_cast<P>(1 - player_turn), ply - 1);
+		for (auto a : actions) {
+			T next_state(state);
+			
+			#ifdef BRANCHING_FACTOR
+        			minimax_nodes++;
+			#endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
 			v = std::max(v, v1);
 		}
 		return v;
 	}
 
-	static int8_t min_value(T& state, P player_turn, int ply)
+	static int8_t min_value(T& state, P player_turn, int depth)
 	{
-		if (ply == 0 || state.terminal_test()) return state.utility(player_turn);
+                // Cutoff tests
+                if (state.cutoff_test1(depth)) return state.h1(player_turn);
+                if (state.cutoff_test2(depth)) return state.h1(player_turn);
+		
+		if (state.terminal_test()) return state.utility(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
 		int8_t v = 126, v1;
-		for (auto const a : actions) {
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? min_value(child_state, player_turn, ply) : max_value(child_state, static_cast<P>(1 - player_turn), ply - 1);
+		for (auto a : actions) {
+			T next_state(state);
+		
+			#ifdef BRANCHING_FACTOR
+                                minimax_nodes++;
+                        #endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? min_value(next_state, player_turn, depth) : max_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
 			v = std::min(v, v1);
 		}
 		return v;
 	}
 
-	static int minimax_decision(T& state, P player_turn, int ply)
+	public:
+	static int minimax_decision(T& state, P player_turn, int depth)
 	{
 		std::vector<int> actions = state.actions(player_turn);
+		
+		minimax_nodes = 1;
 
 		int8_t v = -128, v1;
 		int m = -1;
-		for (auto const a : actions) {
+		for (auto a : actions) {
 			// Deepcopy state
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? max_value(child_state, player_turn, ply) : min_value(child_state, static_cast<P>(1 - player_turn), ply - 1);
+			T next_state(state);
+
+			#ifdef BRANCHING_FACTOR
+                                minimax_nodes++;
+                        #endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
 			if (v1 > v) {
 				v = v1;
 				m = a;
@@ -60,18 +89,26 @@ struct Search {
 	}
 
 	// ALPHABETA PRUNING
-
-	static int8_t max_value(T& state, P player_turn, int ply, int8_t alpha, int8_t beta)
+	private:
+	static int8_t max_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-		if (ply == 0 || state.terminal_test()) return state.utility(player_turn);
+                if (state.cutoff_test1(depth)) return state.h1(player_turn);
+		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+
+                if (state.terminal_test()) return state.utility(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
 		int8_t v = -128, v1;
-		for (auto const a : actions) {
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? max_value(child_state, player_turn, ply, alpha, beta) : min_value(child_state, static_cast<P>(1 - player_turn), ply - 1, alpha, beta);
+		for (auto a : actions) {
+			T next_state(state);
+			
+			#ifdef BRANCHING_FACTOR
+                                alphabeta_nodes++;
+                        #endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
 			v = std::max(v, v1);
 			if(v >= beta) return v;
 			alpha = std::max(alpha, v);
@@ -79,41 +116,54 @@ struct Search {
 		return v;
 	}
 
-	static int8_t min_value(T& state, P player_turn, int ply, int8_t alpha, int8_t beta)
+	static int8_t min_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-		if (ply == 0 || state.terminal_test()) return state.utility(player_turn);
+                if (state.cutoff_test1(depth)) return state.h1(player_turn);
+		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+
+                if (state.terminal_test()) return state.utility(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
 		int8_t v = 126, v1;
-		for (auto const a : actions) {
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? min_value(child_state, player_turn, ply, alpha, beta) : max_value(child_state, static_cast<P>(1 - player_turn), ply - 1, alpha, beta);
+		for (auto a : actions) {
+			T next_state(state);
+
+			#ifdef BRANCHING_FACTOR
+                                alphabeta_nodes++;
+                        #endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? min_value(next_state, player_turn, depth, alpha, beta) : max_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
 			v = std::min(v, v1);
 			if(v <= alpha) return v;
 			beta = std::min(beta, v);
 		}
 		return v;
 	}
-
-	static int alphabeta_search(T& state, P player_turn, int ply)
+	public:
+	static int alphabeta_search(T& state, P player_turn, int depth)
 	{
-		std::vector<int> actions = state.actions(player_turn);
+                std::vector<int> actions = state.actions(player_turn);
+		
+		alphabeta_nodes = 1;
 
 		int8_t alpha = -128, beta = 126;
 		int8_t v = -128, v1;
 		int m = -1;
 		for (auto const a : actions) {
-			// Deepcopy state
-			T child_state(state);
-			bool is_turn = child_state.result(a, player_turn);
-			v1 = is_turn ? max_value(child_state, player_turn, ply, alpha, beta) : min_value(child_state, static_cast<P>(1 - player_turn), ply - 1, alpha, beta);
+			T next_state(state);
+
+			#ifdef BRANCHING_FACTOR
+                                alphabeta_nodes++;
+                        #endif
+
+			bool is_turn = next_state.result(a, player_turn);
+			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
 			if (v1 > v) {
 				v = v1;
 				m = a;
 			}
-			if (v >= beta) break;
 			alpha = std::max(alpha, v);
 		}
 		return m;
