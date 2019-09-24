@@ -14,7 +14,7 @@
 #undef PIE_RULE
 
 #define PRESS_ENTER std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-//#undef PRESS_ENTER
+// #undef PRESS_ENTER
 
 constexpr int CUTOFF_DEPTH_MINIMAX = 9;
 constexpr int CUTOFF_DEPTH_ALPHABETA = 13;
@@ -199,6 +199,19 @@ int main(int argc, char *argv[])
 
 	// Initialize the board
 	BoardState current_state;
+
+#ifdef PIE_RULE
+	// Player 1
+       	evaluate(strategy1, Turn::PLAYER1, current_state);
+
+	// Switiching sides
+	std::swap(strategy1, strategy2);
+    
+     	std::cout << "Sides are switched!" << std::endl;
+
+	// Player 2
+        evaluate(strategy2, Turn::PLAYER2, current_state);	
+#endif
 
 	// Game loop
 	while (true) {

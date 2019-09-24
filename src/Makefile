@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Werror -Wextra -DBRANCHING_FACTOR -DPIE_RULE -std=c++17 -I. -Ofast
+CXXFLAGS = -Wall -Werror -Wextra -DBRANCHING_FACTOR -DITERATIVE_DEEPENING -DPIE_RULE -std=c++17 -I. -Ofast
 SOURCE = play.cpp
 OBJECTS = play.o
 TARGET = play
