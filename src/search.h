@@ -1,21 +1,21 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include <bits/stdc++.h> 
-
-// MINIMAX
+// List of search functions and helpers
+// Borrowed directly from the textbook
 
 template <class T, class P>
 struct Search {
 	static inline int minimax_nodes = 0;
        	static inline int alphabeta_nodes = 0;
 	
+	// MINIMAX
+
 	private:	
 	static int8_t max_value(T& state, P player_turn, int depth)
 	{
 		// Cutoff tests
-		if (state.cutoff_test1(depth)) return state.h1(player_turn);
-		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+		if (state.cutoff_test(depth)) return state.h1(player_turn);
 
 		if (state.terminal_test()) return state.utility(player_turn);
 
@@ -39,8 +39,7 @@ struct Search {
 	static int8_t min_value(T& state, P player_turn, int depth)
 	{
                 // Cutoff tests
-                if (state.cutoff_test1(depth)) return state.h1(player_turn);
-                if (state.cutoff_test2(depth)) return state.h1(player_turn);
+                if (state.cutoff_test(depth)) return state.h1(player_turn);
 		
 		if (state.terminal_test()) return state.utility(player_turn);
 
@@ -92,8 +91,7 @@ struct Search {
 	private:
 	static int8_t max_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-                if (state.cutoff_test1(depth)) return state.h1(player_turn);
-		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+                if (state.cutoff_test(depth)) return state.h1(player_turn);
 
                 if (state.terminal_test()) return state.utility(player_turn);
 
@@ -118,8 +116,7 @@ struct Search {
 
 	static int8_t min_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-                if (state.cutoff_test1(depth)) return state.h1(player_turn);
-		if (state.cutoff_test2(depth)) return state.h1(player_turn);
+                if (state.cutoff_test(depth)) return state.h1(player_turn);
 
                 if (state.terminal_test()) return state.utility(player_turn);
 
@@ -142,7 +139,7 @@ struct Search {
 		return v;
 	}
 	public:
-	static int alphabeta_search(T& state, P player_turn, int depth)
+	static int alphabeta_decision(T& state, P player_turn, int depth)
 	{
                 std::vector<int> actions = state.actions(player_turn);
 		

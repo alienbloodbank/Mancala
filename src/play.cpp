@@ -5,14 +5,23 @@
  */
 
 #include <unistd.h>
+#include <bits/stdc++.h>
 
 #include "mancala.h"
 #include "search.h"
 
+#undef BRANCHING_FACTOR
+#undef PIE_RULE
+
 #define PRESS_ENTER std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+//#undef PRESS_ENTER
+
+constexpr int CUTOFF_DEPTH_MINIMAX = 9;
+constexpr int CUTOFF_DEPTH_ALPHABETA = 13;
 
 using namespace mancala;
 
+// List of valid strategies
 enum class Strategy
 {
         RANDOM,
@@ -28,7 +37,7 @@ const std::map<std::string, Strategy> strategy_types = {
 	{ "alphabeta", Strategy::ALPHABETA}
 };
 
- /* High resolution timer class for measuring times */
+// High resolution timer class for measuring times
 class Timer
 {
 private:
@@ -45,10 +54,11 @@ public:
 	}
 };
 
+// Current player's turn to make a move
 void evaluate(Strategy player, Turn player_turn, BoardState &current_state) 
 {
 	int move;
-	bool is_turn = true;
+	bool is_free_turn = true;
 
 	static std::random_device random_device;
   	static std::mt19937 engine{random_device()};
@@ -56,27 +66,30 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 	std::cerr << "\nP" << player_turn + 1 << " turn...\n\nPress enter to continue...";
         PRESS_ENTER
 
-	while (is_turn) {
+	// Free turn loop
+	while (is_free_turn) {
+		// Get list of valid player actions on the current board
 		std::vector<int> actions = current_state.actions(player_turn);
 	
-		current_state.display(player_turn);
+		current_state.display();
 
+		// Decide the player's strategy: (human, random, minimax, alphabeta)
 		switch(player) {
 			case Strategy::HUMAN:
-				while(true) {
+				// Illegal move loop
+				while (true) {
 					std::cerr << "\nEnter a move: ";
 				
-					if (!(std::cin >> move)){
+					// Check if move is an integer
+					if (!(std::cin >> move)) {
 						std::cin.clear();
     						PRESS_ENTER
 					} else {
 						PRESS_ENTER
 						move--;
-						/*if((move < PITS) && (move >= 0) && actions[move]) {
-							std::cerr << "Human choose: " << move + 1 << std::endl;
-							break;
-						}*/
-						if ( std::find(actions.begin(), actions.end(), move) != actions.end() ) {
+						
+						// Check if move is a valid action
+						if (std::find(actions.begin(), actions.end(), move) != actions.end()) {
 							std::cerr << "Human choose: " << move + 1 << std::endl;
 							break;
 						}
@@ -86,22 +99,6 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				break;
 			case Strategy::RANDOM:
 				{
-/*					int legal_action_count = 0;
-					for(size_t i = 0;i < PITS;i++) {
-						if(actions[i]) legal_action_count++;
-					}
-					std::uniform_int_distribution<int> dist(0, legal_action_count - 1);
-					int index_move = dist(engine);
-					size_t j = 0;
-					for(size_t i = 0;i < PITS;i++) {
-						if(actions[i]) {
-							if(j == index_move) {
-								move = i;
-								break;
-							}
-							j++;
-						}	
-					}*/
 					std::uniform_int_distribution<int> dist(0, actions.size() - 1);
 					move = actions[dist(engine)];
 					std::cerr << "Random choose: " << move + 1 << std::endl;
@@ -111,7 +108,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				{
 					std::cerr << "Minimax running...\n";
 					Timer minimax_time;
-					move = Search<BoardState, Turn>::minimax_decision(current_state, player_turn, 8);
+					move = Search<BoardState, Turn>::minimax_decision(current_state, player_turn, CUTOFF_DEPTH_MINIMAX);
 					std::cerr << "Minimax choose: " << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << minimax_time.elapsed() << " ms" << std::endl;
 					#ifdef BRANCHING_FACTOR
@@ -123,7 +120,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				{
 					std::cerr << "Alphabeta running...\n";
 					Timer alphabeta_time;
-					move = Search<BoardState, Turn>::alphabeta_search(current_state, player_turn, 12);
+					move = Search<BoardState, Turn>::alphabeta_decision(current_state, player_turn, CUTOFF_DEPTH_ALPHABETA);
 					std::cerr << "Alphabeta choose: " << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << alphabeta_time.elapsed() << " ms" << std::endl;
 					#ifdef BRANCHING_FACTOR
@@ -135,25 +132,29 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				break;
 		}
 
-		// current_state is updated as the player makes a move
-		is_turn = current_state.result(move, player_turn);
+		// Board is updated as the player makes a move
+		is_free_turn = current_state.result(move, player_turn);
 
-		current_state.display(player_turn);
+		// Display the updated board
+		current_state.display();
 
 		// Check if game is terminated
 		if (current_state.terminal_test()) {
 			int outcome = current_state.utility(player_turn);
+			// Current player wins
 			if (outcome > 0) {
 				std::cout << "Player " << player_turn + 1 << " wins!" << std::endl;
-			} else if (outcome < 0) {
+			} else if (outcome < 0) { // Current player looses
 				std::cout << "Player " << (player_turn == 0 ? 2 : 1) << " wins!" << std::endl;
 			} else {
 				std::cout << "Draw." << std::endl;
 			}
+			// Terminate the game
 			exit(EXIT_SUCCESS);
 		}
 
-		if (is_turn) {
+		// Prompt for a free turn
+		if (is_free_turn) {
 			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n\nPress enter to continue...";
 			PRESS_ENTER
 		} else {
@@ -162,6 +163,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 	}
 }
 
+// Get and verify the command line arguments for valid strategies
 std::pair<Strategy, Strategy> get_strategy_types(int argc, char **argv) 
 {
 	if (argc != 3) {
@@ -187,6 +189,7 @@ std::pair<Strategy, Strategy> get_strategy_types(int argc, char **argv)
         return std::make_pair(strategy_types.at(arg1), strategy_types.at(arg2));
 }
 
+// Driver function containing the game loop
 int main(int argc, char *argv[]) 
 {
 	auto [strategy1, strategy2] = get_strategy_types(argc, argv);
@@ -194,6 +197,7 @@ int main(int argc, char *argv[])
 	std::cout << "\n\n*************** WELCOME TO MANCALA ******************\n\n";
 	std::cout << "P1: \"" << argv[1] << "\" VS " << "P2: \"" << argv[2] << "\"" << std::endl;	
 
+	// Initialize the board
 	BoardState current_state;
 
 	// Game loop
@@ -204,7 +208,7 @@ int main(int argc, char *argv[])
 		// Player 2
 		evaluate(strategy2, Turn::PLAYER2, current_state);
 	}
-
+	
         return EXIT_SUCCESS;
 }
 
