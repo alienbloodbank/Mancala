@@ -17,9 +17,17 @@
 // #undef PRESS_ENTER
 
 constexpr int CUTOFF_DEPTH_MINIMAX = 9;
-constexpr int CUTOFF_DEPTH_ALPHABETA = 13;
+constexpr int CUTOFF_DEPTH_ALPHABETA = 12;
 
 using namespace mancala;
+
+// Player 1 outcome
+enum Outcome
+{
+	WIN = 1,
+	LOSS = 2,
+	DRAW = 3
+};
 
 // List of valid strategies
 enum class Strategy
@@ -55,7 +63,7 @@ public:
 };
 
 // Current player's turn to make a move
-void evaluate(Strategy player, Turn player_turn, BoardState &current_state) 
+bool evaluate(Strategy player, Turn player_turn, BoardState &current_state) 
 {
 	int move;
 	bool is_free_turn = true;
@@ -71,7 +79,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 		// Get list of valid player actions on the current board
 		std::vector<int> actions = current_state.actions(player_turn);
 	
-		current_state.display();
+		std::cerr << current_state;
 
 		// Decide the player's strategy: (human, random, minimax, alphabeta)
 		switch(player) {
@@ -136,21 +144,12 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 		is_free_turn = current_state.result(move, player_turn);
 
 		// Display the updated board
-		current_state.display();
+		std::cerr << current_state;
 
 		// Check if game is terminated
 		if (current_state.terminal_test()) {
-			int outcome = current_state.utility(player_turn);
-			// Current player wins
-			if (outcome > 0) {
-				std::cout << "Player " << player_turn + 1 << " wins!" << std::endl;
-			} else if (outcome < 0) { // Current player looses
-				std::cout << "Player " << (player_turn == 0 ? 2 : 1) << " wins!" << std::endl;
-			} else {
-				std::cout << "Draw." << std::endl;
-			}
 			// Terminate the game
-			exit(EXIT_SUCCESS);
+			return true;
 		}
 
 		// Prompt for a free turn
@@ -161,6 +160,7 @@ void evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 			// TODO: print the capture state here		
 		}
 	}
+	return false;
 }
 
 // Get and verify the command line arguments for valid strategies
@@ -190,6 +190,68 @@ std::pair<Strategy, Strategy> get_strategy_types(int argc, char **argv)
 }
 
 // Driver function containing the game loop
+Outcome run_game(Strategy strategy1, Strategy strategy2)
+{
+	// Initialize the board
+        BoardState current_state;
+
+#ifdef PIE_RULE
+        // Player 1
+        evaluate(strategy1, Turn::PLAYER1, current_state);
+
+        // Switiching sides
+        std::swap(strategy1, strategy2);
+
+        std::cout << "Sides are switched!" << std::endl;
+
+        // Player 2
+        evaluate(strategy2, Turn::PLAYER2, current_state);
+#endif
+
+	bool is_terminated = false;
+	Turn current_player;
+        // Game loop
+        while (true) {
+                // Player 1
+		
+		current_player = Turn::PLAYER1;
+                is_terminated = evaluate(strategy1, current_player, current_state);
+
+		if (is_terminated) {
+			break;
+		}
+
+                // Player 2
+		current_player = Turn::PLAYER2;
+                is_terminated = evaluate(strategy2, current_player, current_state);
+
+		if (is_terminated) {
+			break;
+		}
+        }
+
+	int outcome = current_state.utility(current_player);
+
+	if (outcome > 0) {
+		std::cout << "Player " << current_player + 1 << " wins!" << std::endl;
+		return current_player == 0 ? Outcome::WIN : Outcome::LOSS;
+	} else if (outcome < 0) { // Current player looses
+		int opponent = (current_player == 0 ? 2 : 1);
+		std::cout << "Player " << opponent << " wins!" << std::endl;
+		return current_player == 0 ? Outcome::LOSS : Outcome::WIN;
+	} else {
+		std::cout << "Draw." << std::endl;
+		return Outcome::DRAW;
+	}
+}
+
+extern "C" {
+    	// Python wrapper
+	int run_game_wrapper(int a, int b){ 
+	    	return run_game(static_cast<Strategy>(a), static_cast<Strategy>(b)); 
+    	}
+}
+
 int main(int argc, char *argv[]) 
 {
 	auto [strategy1, strategy2] = get_strategy_types(argc, argv);
@@ -197,31 +259,8 @@ int main(int argc, char *argv[])
 	std::cout << "\n\n*************** WELCOME TO MANCALA ******************\n\n";
 	std::cout << "P1: \"" << argv[1] << "\" VS " << "P2: \"" << argv[2] << "\"" << std::endl;	
 
-	// Initialize the board
-	BoardState current_state;
-
-#ifdef PIE_RULE
-	// Player 1
-       	evaluate(strategy1, Turn::PLAYER1, current_state);
-
-	// Switiching sides
-	std::swap(strategy1, strategy2);
-    
-     	std::cout << "Sides are switched!" << std::endl;
-
-	// Player 2
-        evaluate(strategy2, Turn::PLAYER2, current_state);	
-#endif
-
-	// Game loop
-	while (true) {
-		// Player 1
-		evaluate(strategy1, Turn::PLAYER1, current_state);
-
-		// Player 2
-		evaluate(strategy2, Turn::PLAYER2, current_state);
-	}
-	
-        return EXIT_SUCCESS;
+	run_game(strategy1, strategy2);
+		
+        return EXIT_FAILURE;
 }
 

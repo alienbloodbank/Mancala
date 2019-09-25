@@ -1,8 +1,8 @@
 CXX = g++
-CXXFLAGS = -Wall -Werror -Wextra -DBRANCHING_FACTOR -DITERATIVE_DEEPENING -DPIE_RULE -std=c++17 -I. -Ofast
+CXXFLAGS = -Wall -Werror -Wextra -fPIC -DBRANCHING_FACTOR -DITERATIVE_DEEPENING -DPIE_RULE -std=c++17 -I. -Ofast
 SOURCE = play.cpp
 OBJECTS = play.o
-TARGET = play
+TARGET = play libgame.so
 DEPS = mancala.h search.h
 
 default: $(TARGET)
@@ -11,6 +11,7 @@ default: $(TARGET)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 play: $(OBJECTS)
+	$(CXX) -shared -Wl,-soname,libgame.so -o libgame.so $<
 	$(CXX) $< -o $@
 	@echo "Build complete!"
 

@@ -56,9 +56,12 @@ namespace mancala {
 		}
 
 		bool terminal_test();
-		
+
 		std::vector<int> actions(Turn player_turn);
 		void display() const;
+
+		// Friend function to display the board
+		friend std::ostream& operator<< (std::ostream &out, const BoardState &board);
 	};
 
 	// The transition model, which defines the result of the current player's move
@@ -131,7 +134,7 @@ namespace mancala {
 
 	// Returns the set of legal moves in a state.
 	// This function returns a list of bin numbers (0-index) having at least one stone
-	inline std::vector<int> BoardState::actions(Turn player_turn)
+	std::vector<int> BoardState::actions(Turn player_turn)
 	{
 	        int precomputed_limit = (PITS + 1) * player_turn;
 		std::vector<int> moves;
@@ -143,44 +146,45 @@ namespace mancala {
 		return moves;
 	}
 
-	// Display the board
-	void BoardState::display() const 
+	std::ostream& operator<< (std::ostream &err, const BoardState &board)
 	{
-		std::cerr << "\n\nCurrent board contents:\n\n";
-		
-		std::cerr.fill(' ');
-		std::cerr << "     ";
+		err << "\n\nCurrent board contents:\n\n";
+
+		err.fill(' ');
+		err << "     ";
 		for(size_t i = PITS;i > 0;i--){
-			std::cerr << " " << std::setw(2) << i << "  ";
-			if (i == 4) std::cerr << " ";
+			err << " " << std::setw(2) << i << "  ";
+			if (i == 4) err << " ";
 		}
 
-		std::cerr.fill('0');
-		std::cerr << "\n    --------------------------------    \n";
-		std::cerr << " " << std::setw(2) << int(bins[PITS + (PITS + 1)]) << " |";
+		err.fill('0');
+		err << "\n    --------------------------------    \n";
+		err << " " << std::setw(2) << int(board.bins[PITS + (PITS + 1)]) << " |";
 		for(size_t i = PITS;i > 0;i--) {
-			std::cerr << " " << std::setw(2) << int(bins[i - 1 + (PITS + 1)]) << " |";
-			if (i == 4) std::cerr << "|";
+			err << " " << std::setw(2) << int(board.bins[i - 1 + (PITS + 1)]) << " |";
+			if (i == 4) err << "|";
 		}
-		std::cerr << " P2 \n";
-		std::cerr << "----------------------------------------\n";
+		err << " P2 \n";
+		err << "----------------------------------------\n";
 
-		std::cerr << " P1 |";
+		err << " P1 |";
 		for(size_t i = 0;i < PITS;i++) {
-			std::cerr << " " << std::setw(2) << int(bins[i]) << " |";
-			if (i == 2) std::cerr << "|";
+			err << " " << std::setw(2) << int(board.bins[i]) << " |";
+			if (i == 2) err << "|";
 		}
-		std::cerr << " " << std::setw(2) << int(bins[PITS]);
-		std::cerr << "\n    --------------------------------    \n";
+		err << " " << std::setw(2) << int(board.bins[PITS]);
+		err << "\n    --------------------------------    \n";
 
-		std::cerr.fill(' ');
-		std::cerr << "     ";
+		err.fill(' ');
+		err << "     ";
 		for(size_t i = 1;i < PITS + 1;i++) {
-			std::cerr << " " << std::setw(2) << i << "  ";
-			if (i == 3) std::cerr << " ";
+			err << " " << std::setw(2) << i << "  ";
+			if (i == 3) err << " ";
 		}
 
-		std::cerr << "\n\n" << std::flush;
+		err << "\n\n" << std::flush;
+
+		return err;
 	}
 }
 
