@@ -14,10 +14,8 @@ struct Search {
 	private:	
 	static int8_t max_value(T& state, P player_turn, int depth)
 	{
-		// Cutoff tests
-		if (state.cutoff_test(depth)) return state.h1(player_turn);
-
 		if (state.terminal_test()) return state.utility(player_turn);
+		if (state.cutoff_test(depth)) return state.h1(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
@@ -30,7 +28,7 @@ struct Search {
 			#endif
 
 			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
+			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, player_turn, depth - 1);
 			v = std::max(v, v1);
 		}
 		return v;
@@ -38,12 +36,11 @@ struct Search {
 
 	static int8_t min_value(T& state, P player_turn, int depth)
 	{
-                // Cutoff tests
-                if (state.cutoff_test(depth)) return state.h1(player_turn);
-		
 		if (state.terminal_test()) return state.utility(player_turn);
+                if (state.cutoff_test(depth)) return state.h1(player_turn);
 
-		std::vector<int> actions = state.actions(player_turn);
+		P opponent = static_cast<P>(1 - player_turn);
+		std::vector<int> actions = state.actions(opponent);
 
 		int8_t v = 126, v1;
 		for (auto a : actions) {
@@ -53,8 +50,8 @@ struct Search {
                                 minimax_nodes++;
                         #endif
 
-			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? min_value(next_state, player_turn, depth) : max_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
+			bool is_turn = next_state.result(a, opponent);
+			v1 = is_turn ? min_value(next_state, player_turn, depth) : max_value(next_state, player_turn, depth - 1);
 			v = std::min(v, v1);
 		}
 		return v;
@@ -78,7 +75,7 @@ struct Search {
                         #endif
 
 			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1);
+			v1 = is_turn ? max_value(next_state, player_turn, depth) : min_value(next_state, player_turn, depth - 1);
 			if (v1 > v) {
 				v = v1;
 				m = a;
@@ -91,9 +88,8 @@ struct Search {
 	private:
 	static int8_t max_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-                if (state.cutoff_test(depth)) return state.h1(player_turn);
-
                 if (state.terminal_test()) return state.utility(player_turn);
+		if (state.cutoff_test(depth)) return state.h1(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
@@ -106,7 +102,7 @@ struct Search {
                         #endif
 
 			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
+			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, player_turn, depth - 1, alpha, beta);
 			v = std::max(v, v1);
 			if(v >= beta) return v;
 			alpha = std::max(alpha, v);
@@ -116,11 +112,12 @@ struct Search {
 
 	static int8_t min_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
-                if (state.cutoff_test(depth)) return state.h1(player_turn);
-
                 if (state.terminal_test()) return state.utility(player_turn);
+		if (state.cutoff_test(depth)) return state.h1(player_turn);
 
-		std::vector<int> actions = state.actions(player_turn);
+		P opponent = static_cast<P>(1 - player_turn);		
+
+		std::vector<int> actions = state.actions(opponent);
 
 		int8_t v = 126, v1;
 		for (auto a : actions) {
@@ -130,8 +127,8 @@ struct Search {
                                 alphabeta_nodes++;
                         #endif
 
-			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? min_value(next_state, player_turn, depth, alpha, beta) : max_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
+			bool is_turn = next_state.result(a, opponent);
+			v1 = is_turn ? min_value(next_state, player_turn, depth, alpha, beta) : max_value(next_state, player_turn, depth - 1, alpha, beta);
 			v = std::min(v, v1);
 			if(v <= alpha) return v;
 			beta = std::min(beta, v);
@@ -156,7 +153,7 @@ struct Search {
                         #endif
 
 			bool is_turn = next_state.result(a, player_turn);
-			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, static_cast<P>(1 - player_turn), depth - 1, alpha, beta);
+			v1 = is_turn ? max_value(next_state, player_turn, depth, alpha, beta) : min_value(next_state, player_turn, depth - 1, alpha, beta);
 			if (v1 > v) {
 				v = v1;
 				m = a;

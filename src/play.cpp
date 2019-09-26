@@ -16,8 +16,8 @@
 #define PRESS_ENTER std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 // #undef PRESS_ENTER
 
-constexpr int CUTOFF_DEPTH_MINIMAX = 9;
-constexpr int CUTOFF_DEPTH_ALPHABETA = 12;
+constexpr int CUTOFF_DEPTH_MINIMAX = 8;
+constexpr int CUTOFF_DEPTH_ALPHABETA = 8;
 
 using namespace mancala;
 
@@ -72,10 +72,10 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
   	static std::mt19937 engine{random_device()};
 
 	std::cerr << "\nP" << player_turn + 1 << " turn...\n\nPress enter to continue...";
-        PRESS_ENTER
+        //PRESS_ENTER
 
 	// Free turn loop
-	while (is_free_turn) {
+	do {
 		// Get list of valid player actions on the current board
 		std::vector<int> actions = current_state.actions(player_turn);
 	
@@ -148,45 +148,19 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 
 		// Check if game is terminated
 		if (current_state.terminal_test()) {
-			// Terminate the game
 			return true;
 		}
 
 		// Prompt for a free turn
 		if (is_free_turn) {
 			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n\nPress enter to continue...";
-			PRESS_ENTER
+			//PRESS_ENTER
 		} else {
 			// TODO: print the capture state here		
 		}
-	}
+	} while(is_free_turn);
+
 	return false;
-}
-
-// Get and verify the command line arguments for valid strategies
-std::pair<Strategy, Strategy> get_strategy_types(int argc, char **argv) 
-{
-	if (argc != 3) {
-                std::cerr << "Duh this version of Mancala is a 2-player game. \nExiting..." << std::endl;
-                exit(EXIT_FAILURE);
-        }
-
-	std::string arg1(argv[1]), arg2(argv[2]);
-	bool is_strategy1_valid = strategy_types.find(arg1) != strategy_types.end();
-	bool is_strategy2_valid = strategy_types.find(arg2) != strategy_types.end();
-
-        if (!is_strategy1_valid && !is_strategy2_valid) {
-               	std::cerr << "Invalid player strategies. \nTry Again...\n" << std::endl;
-               	exit(EXIT_FAILURE);
-        } else if (!is_strategy1_valid) {
-		std::cerr << "Invalid player1 strategy. \nTry Again..." << std::endl;
-               	exit(EXIT_FAILURE);
-        } else if (!is_strategy2_valid) {
-                std::cerr << "Invalid player2 strategy. \nTry Again..." << std::endl;
-                exit(EXIT_FAILURE);
-	}
-
-        return std::make_pair(strategy_types.at(arg1), strategy_types.at(arg2));
 }
 
 // Driver function containing the game loop
@@ -250,6 +224,32 @@ extern "C" {
 	int run_game_wrapper(int a, int b){ 
 	    	return run_game(static_cast<Strategy>(a), static_cast<Strategy>(b)); 
     	}
+}
+
+// Get and verify the command line arguments for valid strategies
+std::pair<Strategy, Strategy> get_strategy_types(int argc, char **argv)
+{
+        if (argc != 3) {
+                std::cerr << "Duh this version of Mancala is a 2-player game. \nExiting..." << std::endl;
+                exit(EXIT_FAILURE);
+        }
+
+        std::string arg1(argv[1]), arg2(argv[2]);
+        bool is_strategy1_valid = strategy_types.find(arg1) != strategy_types.end();
+        bool is_strategy2_valid = strategy_types.find(arg2) != strategy_types.end();
+
+        if (!is_strategy1_valid && !is_strategy2_valid) {
+                std::cerr << "Invalid player strategies. \nTry Again...\n" << std::endl;
+                exit(EXIT_FAILURE);
+        } else if (!is_strategy1_valid) {
+                std::cerr << "Invalid player1 strategy. \nTry Again..." << std::endl;
+                exit(EXIT_FAILURE);
+        } else if (!is_strategy2_valid) {
+                std::cerr << "Invalid player2 strategy. \nTry Again..." << std::endl;
+                exit(EXIT_FAILURE);
+        }
+
+        return std::make_pair(strategy_types.at(arg1), strategy_types.at(arg2));
 }
 
 int main(int argc, char *argv[]) 

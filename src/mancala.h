@@ -43,12 +43,42 @@ namespace mancala {
 		bool result(int move, Turn player_turn);
 		int8_t utility(Turn player_turn) const;
 
-		// Heuristic evaluation function applied when cutoff is reached
+		// Heuristics
+		
+		// Difference between players store and oppponent store
 		int8_t h1(Turn player_turn)
-		{
-			return bins[PITS + (PITS + 1) * player_turn] - bins[PITS + (PITS + 1) * (1 - player_turn)];
+        	{
+                	return bins[PITS + (PITS + 1) * player_turn] - bins[PITS + (PITS + 1) * (1 - player_turn)];
+
+        	}
+/*
+		// Number of non-empty pits in player's row
+                int8_t h2(Turn player_turn)
+                {
+			int8_t count = 0;
+			int precomputed_limit = (PITS + 1) * player_turn;
+			for(size_t i = 0;i < PITS;i++) {{
+				count = count + !!bins[i + precomputed_limit];
+			}
+                        return count;
+                }
+
+		// Number of stones on player's board
+                int8_t h3(Turn player_turn)
+                {
+               		int8_t count = 0;
+			int precomputed_limit = (PITS + 1) * player_turn;
+                	for(size_t i = 0;i < PITS;i++) {
+                        	count += (bins[i + precomputed_limit]);
+                	}
+                	return count;
 		}
 
+		int8_t h4(Turn player_turn)
+		{
+			return h1(player_turn) + h2(player_turn) + 0.3 * (h3(player_turn));
+		}
+*/
 		// Cutoff tests for heuristic minimax/alphabeta
 		bool cutoff_test(int depth)
 		{
@@ -58,7 +88,6 @@ namespace mancala {
 		bool terminal_test();
 
 		std::vector<int> actions(Turn player_turn);
-		void display() const;
 
 		// Friend function to display the board
 		friend std::ostream& operator<< (std::ostream &out, const BoardState &board);
