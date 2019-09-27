@@ -45,40 +45,43 @@ namespace mancala {
 
 		// Heuristics
 		
-		// Difference between players store and oppponent store
+		// Heuristic 1: Difference between players store and oppponent store
 		int8_t h1(Turn player_turn)
         	{
                 	return bins[PITS + (PITS + 1) * player_turn] - bins[PITS + (PITS + 1) * (1 - player_turn)];
 
         	}
-/*
-		// Number of non-empty pits in player's row
+
+		// Heuristic 2: Number of non-empty pits in player's row
                 int8_t h2(Turn player_turn)
                 {
 			int8_t count = 0;
-			int precomputed_limit = (PITS + 1) * player_turn;
-			for(size_t i = 0;i < PITS;i++) {{
-				count = count + !!bins[i + precomputed_limit];
+			int precomputed_limit1 = (PITS + 1) * player_turn;
+                	//int precomputed_limit2 = (PITS + 1) * (1 - player_turn);
+			for(size_t i = 0;i < PITS;i++) {
+				count += (!!bins[i + precomputed_limit1]);
 			}
                         return count;
                 }
 
-		// Number of stones on player's board
+		// Heursitic 3: Number of stones on player's board with decreasing probability from 0 - 5
+		// This heuristic gives more weight to the stones on the far left of the player's store
                 int8_t h3(Turn player_turn)
                 {
                		int8_t count = 0;
-			int precomputed_limit = (PITS + 1) * player_turn;
+			int precomputed_limit1 = (PITS + 1) * player_turn;
+			//int precomputed_limit2 = (PITS + 1) * (1 - player_turn);
                 	for(size_t i = 0;i < PITS;i++) {
-                        	count += (bins[i + precomputed_limit]);
+                        	count += 0.1 * (PITS - i) * (bins[i + precomputed_limit1]);
                 	}
                 	return count;
 		}
 
-		int8_t h4(Turn player_turn)
+		int8_t eval(Turn player_turn)
 		{
-			return h1(player_turn) + h2(player_turn) + 0.3 * (h3(player_turn));
+			return h1(player_turn) + h2(player_turn);// + h3(player_turn);
 		}
-*/
+
 		// Cutoff tests for heuristic minimax/alphabeta
 		bool cutoff_test(int depth)
 		{
@@ -138,9 +141,11 @@ namespace mancala {
 	// each player's side of the board
 	inline int8_t BoardState::utility(Turn player_turn) const
 	{
-		int8_t diff = 0;		
+		int8_t diff = 0;
+		int precomputed_limit1 = (PITS + 1) * player_turn;
+		int precomputed_limit2 = (PITS + 1) * (1 - player_turn);
 		for(size_t i = 0;i <= PITS;i++) {
-			diff += (bins[i + (PITS + 1) * player_turn] - bins[i + (PITS + 1) * (1 - player_turn)]);
+			diff += (bins[i + precomputed_limit1] - bins[i + precomputed_limit2]);
 		}
 		return diff;
 	}
@@ -179,12 +184,7 @@ namespace mancala {
 	{
 		err << "\n\nCurrent board contents:\n\n";
 
-		err.fill(' ');
-		err << "     ";
-		for(size_t i = PITS;i > 0;i--){
-			err << " " << std::setw(2) << i << "  ";
-			if (i == 4) err << " ";
-		}
+		err << "       6    5    4     3    2    1  ";
 
 		err.fill('0');
 		err << "\n    --------------------------------    \n";
@@ -205,11 +205,7 @@ namespace mancala {
 		err << "\n    --------------------------------    \n";
 
 		err.fill(' ');
-		err << "     ";
-		for(size_t i = 1;i < PITS + 1;i++) {
-			err << " " << std::setw(2) << i << "  ";
-			if (i == 3) err << " ";
-		}
+		err << "       1    2    3     4    5    6  ";
 
 		err << "\n\n" << std::flush;
 

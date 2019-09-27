@@ -1,7 +1,7 @@
 /* CSC 442: Intro to AI
  * Spring 2019
  * Project 1: Game Playing
- * Author: Soubhik Ghosh (netId: sghosh13)
+ * Authors: Soubhik Ghosh (netId: sghosh13), Rich Magnotti
  */
 
 #include <unistd.h>
@@ -261,6 +261,6 @@ int main(int argc, char *argv[])
 
 	run_game(strategy1, strategy2);
 		
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
 }
 

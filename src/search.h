@@ -15,7 +15,7 @@ struct Search {
 	static int8_t max_value(T& state, P player_turn, int depth)
 	{
 		if (state.terminal_test()) return state.utility(player_turn);
-		if (state.cutoff_test(depth)) return state.h1(player_turn);
+		if (state.cutoff_test(depth)) return state.eval(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
@@ -37,7 +37,7 @@ struct Search {
 	static int8_t min_value(T& state, P player_turn, int depth)
 	{
 		if (state.terminal_test()) return state.utility(player_turn);
-                if (state.cutoff_test(depth)) return state.h1(player_turn);
+                if (state.cutoff_test(depth)) return state.eval(player_turn);
 
 		P opponent = static_cast<P>(1 - player_turn);
 		std::vector<int> actions = state.actions(opponent);
@@ -89,7 +89,7 @@ struct Search {
 	static int8_t max_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
                 if (state.terminal_test()) return state.utility(player_turn);
-		if (state.cutoff_test(depth)) return state.h1(player_turn);
+		if (state.cutoff_test(depth)) return state.eval(player_turn);
 
 		std::vector<int> actions = state.actions(player_turn);
 
@@ -113,7 +113,7 @@ struct Search {
 	static int8_t min_value(T& state, P player_turn, int depth, int8_t alpha, int8_t beta)
 	{
                 if (state.terminal_test()) return state.utility(player_turn);
-		if (state.cutoff_test(depth)) return state.h1(player_turn);
+		if (state.cutoff_test(depth)) return state.eval(player_turn);
 
 		P opponent = static_cast<P>(1 - player_turn);		
 
