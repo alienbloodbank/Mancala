@@ -42,6 +42,8 @@ namespace mancala {
 
 		bool result(int move, Turn player_turn);
 		int8_t utility(Turn player_turn) const;
+		std::vector<int> actions(Turn player_turn);
+		bool terminal_test();
 
 		// Heuristics
 		
@@ -52,14 +54,14 @@ namespace mancala {
 
         	}
 
-		// Heuristic 2: Number of non-empty pits in player's row
+		// Heuristic 2: Difference between the number of non-empty pits in player's row and opponent's row
                 int8_t h2(Turn player_turn)
                 {
 			int8_t count = 0;
 			int precomputed_limit1 = (PITS + 1) * player_turn;
-                	//int precomputed_limit2 = (PITS + 1) * (1 - player_turn);
+                	int precomputed_limit2 = (PITS + 1) * (1 - player_turn);
 			for(size_t i = 0;i < PITS;i++) {
-				count += (!!bins[i + precomputed_limit1]);
+				count += (!!bins[i + precomputed_limit1] - !!bins[i + precomputed_limit2]);
 			}
                         return count;
                 }
@@ -79,18 +81,14 @@ namespace mancala {
 
 		int8_t eval(Turn player_turn)
 		{
-			return h1(player_turn) + h2(player_turn);// + h3(player_turn);
+			return h1(player_turn) + h2(player_turn);
 		}
 
 		// Cutoff tests for heuristic minimax/alphabeta
 		bool cutoff_test(int depth)
 		{
-			return (depth == 0) || (bins[PITS] > HALF_STONES) || (bins[BOARD_SIZE - 1] > HALF_STONES);
+			return (depth == 0);
 		}
-
-		bool terminal_test();
-
-		std::vector<int> actions(Turn player_turn);
 
 		// Friend function to display the board
 		friend std::ostream& operator<< (std::ostream &out, const BoardState &board);

@@ -1,7 +1,7 @@
 /* CSC 442: Intro to AI
  * Spring 2019
  * Project 1: Game Playing
- * Authors: Soubhik Ghosh (netId: sghosh13), Rich Magnotti
+ * Authors: Soubhik Ghosh (netId: sghosh13), Richard Magnotti (netId: rmagnott)
  */
 
 #include <unistd.h>
@@ -71,8 +71,7 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 	static std::random_device random_device;
   	static std::mt19937 engine{random_device()};
 
-	std::cerr << "\nP" << player_turn + 1 << " turn...\n\nPress enter to continue...";
-        //PRESS_ENTER
+	std::cerr << "\nP" << player_turn + 1 << " turn...\n";
 
 	// Free turn loop
 	do {
@@ -98,7 +97,8 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 						
 						// Check if move is a valid action
 						if (std::find(actions.begin(), actions.end(), move) != actions.end()) {
-							std::cerr << "Human choose: " << move + 1 << std::endl;
+							std::cerr << "Human chose: \n";
+							std::cerr << (player_turn == Turn::PLAYER1 ? "" : " ") << move + 1 << std::endl;
 							break;
 						}
 					}
@@ -109,7 +109,8 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 				{
 					std::uniform_int_distribution<int> dist(0, actions.size() - 1);
 					move = actions[dist(engine)];
-					std::cerr << "Random choose: " << move + 1 << std::endl;
+					std::cerr << "Random chose: \n";
+					std::cerr << (player_turn == Turn::PLAYER1 ? "" : " ") << move + 1 << std::endl;
 				}
 				break;
 			case Strategy::MINIMAX:
@@ -117,7 +118,8 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 					std::cerr << "Minimax running...\n";
 					Timer minimax_time;
 					move = Search<BoardState, Turn>::minimax_decision(current_state, player_turn, CUTOFF_DEPTH_MINIMAX);
-					std::cerr << "Minimax choose: " << move + 1 << std::endl;
+					std::cerr << "Minimax chose: \n";
+					std::cerr << (player_turn == Turn::PLAYER1 ? "" : " ") << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << minimax_time.elapsed() << " ms" << std::endl;
 					#ifdef BRANCHING_FACTOR
 						std::cerr << "Minimax explored nodes: " << Search<BoardState, Turn>::minimax_nodes << std::endl;
@@ -129,7 +131,8 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 					std::cerr << "Alphabeta running...\n";
 					Timer alphabeta_time;
 					move = Search<BoardState, Turn>::alphabeta_decision(current_state, player_turn, CUTOFF_DEPTH_ALPHABETA);
-					std::cerr << "Alphabeta choose: " << move + 1 << std::endl;
+					std::cerr << "Alphabeta chose: \n";
+					std::cerr << (player_turn == Turn::PLAYER1 ? "" : " ") << move + 1 << std::endl;
 					std::cerr << "Elapsed time: " << alphabeta_time.elapsed() << " ms" << std::endl;
 					#ifdef BRANCHING_FACTOR
                                                 std::cerr << "Alphabeta explored nodes: " << Search<BoardState, Turn>::alphabeta_nodes << std::endl;
@@ -153,8 +156,7 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 
 		// Prompt for a free turn
 		if (is_free_turn) {
-			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n\nPress enter to continue...";
-			//PRESS_ENTER
+			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n";
 		} else {
 			// TODO: print the capture state here		
 		}
