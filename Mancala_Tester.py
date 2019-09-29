@@ -25,7 +25,7 @@ random = 0
 human = 1
 minimax = 2
 alphabeta = 3
-totalCalls = 20
+totalCalls = 5
 
 for i in range(totalCalls):
     print('Game number ', i+1)
@@ -43,5 +43,8 @@ plt.ylim(top=totalCalls)
 plt.title('Num Times Won | %s vs %s, %s Matches' %(playerSelection1, playerSelection2, totalCalls))
 
 plt.show()
+
+
+
 
 
