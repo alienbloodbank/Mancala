@@ -1,6 +1,6 @@
 /* CSC 442: Intro to AI
  * Spring 2019
- * Project 1: Game Playing
+ * Project 1: Game Playing - Mancala
  * Authors: Soubhik Ghosh (netId: sghosh13), Richard Magnotti (netId: rmagnott)
  */
 
@@ -11,10 +11,8 @@
 #include "search.h"
 
 #undef BRANCHING_FACTOR
-#undef PIE_RULE
 
 #define PRESS_ENTER std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-// #undef PRESS_ENTER
 
 constexpr int CUTOFF_DEPTH_MINIMAX = 8;
 constexpr int CUTOFF_DEPTH_ALPHABETA = 8;
@@ -157,9 +155,7 @@ bool evaluate(Strategy player, Turn player_turn, BoardState &current_state)
 		// Prompt for a free turn
 		if (is_free_turn) {
 			std::cerr << "\nP" << player_turn + 1 << " gets another turn...\n";
-		} else {
-			// TODO: print the capture state here		
-		}
+		} 
 	} while(is_free_turn);
 
 	return false;
@@ -170,19 +166,6 @@ Outcome run_game(Strategy strategy1, Strategy strategy2)
 {
 	// Initialize the board
         BoardState current_state;
-
-#ifdef PIE_RULE
-        // Player 1
-        evaluate(strategy1, Turn::PLAYER1, current_state);
-
-        // Switiching sides
-        std::swap(strategy1, strategy2);
-
-        std::cout << "Sides are switched!" << std::endl;
-
-        // Player 2
-        evaluate(strategy2, Turn::PLAYER2, current_state);
-#endif
 
 	bool is_terminated = false;
 	Turn current_player;
@@ -226,6 +209,14 @@ extern "C" {
 	int run_game_wrapper(int a, int b){ 
 	    	return run_game(static_cast<Strategy>(a), static_cast<Strategy>(b)); 
     	}
+
+	void disable_cppoutput() {
+		std::cerr.setstate(std::ios_base::failbit);
+	}
+
+	void enable_cppoutput() {
+		std::cerr.clear();
+	}
 }
 
 // Get and verify the command line arguments for valid strategies

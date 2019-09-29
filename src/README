@@ -1,0 +1,33 @@
+CSC442: Intro to AI
+September 15, 2019
+Authors:
+ - Soubhik Ghosh (netid: sghosh13)
+ - Rich Magnotti (netid: rmagnott)
+
+Language: C++
+
+Files in src/:
+        README, Makefile, play.cpp, mancala.h, search.h, Mancala_Tester.py
+
+Prerequisites:
+	'make' utility
+	g++ compiler with C++17 support
+	python3 (Optional)
+
+Build Instructions:
+	- cd src/ (Go inside source directory)
+	- make (Fire "make" command)
+
+Output
+	- play (binary file to run the game)
+	- libplay.so (shared object file used by the python script)
+
+Running Examples:
+	- Human vs Human
+	  ./play human human
+	- Human vs Random
+	  ./play human random
+	- Random vs minimax
+	  ./play random minimax
+	- Alphabeta Pruning vs minimax
+	  ./play alphabeta minimax

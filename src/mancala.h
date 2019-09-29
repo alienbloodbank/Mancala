@@ -165,7 +165,7 @@ namespace mancala {
 	}
 
 	// Returns the set of legal moves in a state.
-	// This function returns a list of bin numbers (0-index) having at least one stone
+	// This function returns a list of pit numbers (0-index) having at least one stone
 	std::vector<int> BoardState::actions(Turn player_turn)
 	{
 	        int precomputed_limit = (PITS + 1) * player_turn;

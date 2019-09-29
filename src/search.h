@@ -6,8 +6,8 @@
 
 template <class T, class P>
 struct Search {
-	static inline int minimax_nodes = 0;
-       	static inline int alphabeta_nodes = 0;
+	static inline int64_t minimax_nodes = 0;
+       	static inline int64_t alphabeta_nodes = 0;
 	
 	// MINIMAX
 

@@ -1,9 +1,9 @@
 #author: Rich Magnotti and Soubhik Ghoush
 from ctypes import cdll
 import matplotlib.pyplot as plt
-import numpy as np
+import sys, os
 
-lib = cdll.LoadLibrary("./libgame.so")
+lib = cdll.LoadLibrary("./libplay.so")
 
 #hash table representing possible players for p1 and p2
 playerHash = {'random'      : 0,
@@ -16,16 +16,16 @@ winsHash = {1   : 0,
             2   : 0,
             3   : 0}
 
-playerSelection1 = input("Choose player 1: \n") #string to accept usr input as selection
+playerSelection1 = str(input("Choose player 1: \n")) #string to accept usr input as selection
 player1 = playerHash[playerSelection1] #using player selection str as key to get value to pass to C++ wrapper args
-playerSelection2 = input("\nChoose player 2: \n")
+playerSelection2 = str(input("\nChoose player 2: \n"))
 player2 = playerHash[playerSelection2]
 
 random = 0
 human = 1
 minimax = 2
 alphabeta = 3
-totalCalls = 5
+totalCalls = int(sys.argv[1])
 
 for i in range(totalCalls):
     print('Game number ', i+1)
@@ -43,8 +43,4 @@ plt.ylim(top=totalCalls)
 plt.title('Num Times Won | %s vs %s, %s Matches' %(playerSelection1, playerSelection2, totalCalls))
 
 plt.show()
-
-
-
-
 
